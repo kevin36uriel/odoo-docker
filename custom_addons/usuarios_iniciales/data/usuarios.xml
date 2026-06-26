@@ -1,6 +1,22 @@
 <odoo>
     <data noupdate="1">
 
+        <!--
+            ROLES DISPONIBLES EN ODOO:
+            ─────────────────────────────────────────────────────────────────
+            base.group_user          → Usuario interno  (acceso al backend)
+            base.group_portal        → Portal           (solo ve su portal web)
+            base.group_public        → Público          (sin login, visitantes)
+
+            ROLES DE SISTEMA (no asignar manualmente):
+            base.group_system        → Configuración técnica (settings avanzados)
+            base.group_erp_manager   → Administrador ERP
+
+            Para asignar un rol:
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+            ─────────────────────────────────────────────────────────────────
+        -->
+
         <!-- Reemplazar admin por defecto -->
         <record id="base.user_admin" model="res.users">
             <field name="name">Administrador</field>
