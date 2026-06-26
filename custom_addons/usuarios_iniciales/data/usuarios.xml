@@ -1,35 +1,30 @@
 <odoo>
     <data noupdate="1">
-        <record id="user_inicial_kevin" model="res.users">
-            <field name="name">Kevin</field>
-            <field name="login">kevin36uriel@gmail.com</field>
+        <!-- Administrador -->
+        <record id="user_admin_generic" model="res.users">
+            <field name="name">Administrador</field>
+            <field name="login">administrador</field>
             <field name="email">kevin36uriel@gmail.com</field>
             <field name="password">12345</field>
             <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
         </record>
 
-        <record id="user_inicial_claudio" model="res.users">
-            <field name="name">Claudio</field>
-            <field name="login">kevin597uriel@gmail.com</field>
+        <!-- Usuario interno -->
+        <record id="user_usuario_generic" model="res.users">
+            <field name="name">Usuario</field>
+            <field name="login">usuario</field>
             <field name="email">kevin597uriel@gmail.com</field>
             <field name="password">12345</field>
-            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
-        <record id="user_inicial_gael" model="res.users">
-            <field name="name">Gael</field>
-            <field name="login">kevin789uriel@gmail.com</field>
+        <!-- Cliente (portal) -->
+        <record id="user_cliente_generic" model="res.users">
+            <field name="name">Cliente</field>
+            <field name="login">cliente</field>
             <field name="email">kevin789uriel@gmail.com</field>
             <field name="password">12345</field>
-            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
-        </record>
-
-        <record id="user_inicial_elsa" model="res.users">
-            <field name="name">Elsa</field>
-            <field name="login">elsa@correo.com</field>
-            <field name="email">elsa@correo.com</field>
-            <field name="password">12345</field>
-            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+            <field name="groups_id" eval="[(4, ref('base.group_portal'))]"/>
         </record>
     </data>
 </odoo>
