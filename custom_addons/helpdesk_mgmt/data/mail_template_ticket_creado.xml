@@ -1,0 +1,23 @@
+<odoo>
+    <data noupdate="0">
+
+        <record id="mail_template_ticket_confirmacion" model="mail.template">
+            <field name="name">Confirmación ticket cliente</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="subject">Ticket #{{ object.id }}: {{ object.name }} — Asignado</field>
+            <field name="partner_to"></field>
+            <field name="email_to"></field>
+            <field name="body_html"><![CDATA[
+                <p>El ticket <strong>#{{ object.id }}: {{ object.name }}</strong> ha sido asignado a <strong>{{ object.user_id.name }}</strong>.</p>
+                {% if object.partner_id or object.partner_email %}
+                <p>Contacto: {{ object.partner_id.name or object.partner_name }}</p>
+                {% endif %}
+                <p>Descripción: {{ object.description or '—' }}</p>
+                <p>Equipo: {{ object.team_id.name or '—' }}</p>
+                <br/>
+                <p>Equipo de soporte</p>
+            ]]></field>
+        </record>
+
+    </data>
+</odoo>

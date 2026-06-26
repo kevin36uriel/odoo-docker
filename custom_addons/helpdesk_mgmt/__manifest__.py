@@ -16,11 +16,13 @@
     "SDi Soluciones, "
     "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/helpdesk",
-    "depends": ["mail", "portal"],
+    "depends": ["mail", "portal", "base_automation"],
     "data": [
-        "data/helpdesk_data.xml",
         "security/helpdesk_security.xml",
         "security/ir.model.access.csv",
+        "data/helpdesk_data.xml",
+        "data/mail_template_ticket_creado.xml",
+        "data/automatizacion_ticket_creado.xml",
         "views/res_partner_views.xml",
         "views/res_config_settings_views.xml",
         "views/helpdesk_ticket_templates.xml",

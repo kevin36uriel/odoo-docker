@@ -1,12 +1,12 @@
 <odoo>
     <data noupdate="1">
-        <!-- Administrador -->
-        <record id="user_admin_generic" model="res.users">
+
+        <!-- Reemplazar admin por defecto -->
+        <record id="base.user_admin" model="res.users">
             <field name="name">Administrador</field>
             <field name="login">administrador</field>
             <field name="email">kevin36uriel@gmail.com</field>
             <field name="password">12345</field>
-            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
         </record>
 
         <!-- Usuario interno -->
@@ -26,5 +26,6 @@
             <field name="password">12345</field>
             <field name="groups_id" eval="[(4, ref('base.group_portal'))]"/>
         </record>
+
     </data>
 </odoo>
