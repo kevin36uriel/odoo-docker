@@ -18,9 +18,9 @@
     "website": "https://github.com/OCA/helpdesk",
     "depends": ["mail", "portal", "base_automation"],
     "data": [
+        "data/helpdesk_data.xml",
         "security/helpdesk_security.xml",
         "security/ir.model.access.csv",
-        "data/helpdesk_data.xml",
         "data/mail_template_ticket_creado.xml",
         "data/automatizacion_ticket_creado.xml",
         "views/res_partner_views.xml",

@@ -7,11 +7,14 @@
             <field name="trigger">on_create_or_write</field>
             <field name="filter_pre_domain">[['user_id', '=', False]]</field>
             <field name="filter_domain">[['user_id', '!=', False]]</field>
-            <field name="action_server_ids" eval="[(0, 0, {
-                'name': 'Enviar correo responsable y contacto',
-                'model_id': ref('helpdesk_mgmt.model_helpdesk_ticket'),
-                'state': 'code',
-                'code': &quot;&quot;&quot;
+        </record>
+
+        <record id="action_server_ticket_asignado" model="ir.actions.server">
+            <field name="name">Enviar correo responsable y contacto</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="state">code</field>
+            <field name="base_automation_id" ref="helpdesk_mgmt.automatizacion_correo_ticket_creado"/>
+            <field name="code">
 template = env.ref('helpdesk_mgmt.mail_template_ticket_confirmacion')
 for record in records:
     partner_ids = []
@@ -26,8 +29,7 @@ for record in records:
     else:
         continue
     template.send_mail(record.id, force_send=True, email_values=email_vals)
-&quot;&quot;&quot;,
-            })]"/>
+            </field>
         </record>
 
     </data>
