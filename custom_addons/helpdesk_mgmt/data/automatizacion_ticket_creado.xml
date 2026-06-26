@@ -11,22 +11,22 @@
                 'name': 'Enviar correo responsable y contacto',
                 'model_id': ref('helpdesk_mgmt.model_helpdesk_ticket'),
                 'state': 'code',
-                'code': '''
-                template = env.ref(&quot;helpdesk_mgmt.mail_template_ticket_confirmacion&quot;)
-                for record in records:
-                    partner_ids = []
-                    if record.user_id and record.user_id.partner_id:
-                        partner_ids.append(record.user_id.partner_id.id)
-                    if record.partner_id and record.partner_id.id not in partner_ids:
-                        partner_ids.append(record.partner_id.id)
-                    if partner_ids:
-                        email_vals = {&quot;email_to&quot;: False, &quot;recipient_ids&quot;: [(4, pid) for pid in partner_ids]}
-                    elif record.partner_email:
-                        email_vals = {&quot;email_to&quot;: record.partner_email, &quot;recipient_ids&quot;: []}
-                    else:
-                        continue
-                    template.send_mail(record.id, force_send=True, email_values=email_vals)
-                ''',
+                'code': &quot;&quot;&quot;
+template = env.ref('helpdesk_mgmt.mail_template_ticket_confirmacion')
+for record in records:
+    partner_ids = []
+    if record.user_id and record.user_id.partner_id:
+        partner_ids.append(record.user_id.partner_id.id)
+    if record.partner_id and record.partner_id.id not in partner_ids:
+        partner_ids.append(record.partner_id.id)
+    if partner_ids:
+        email_vals = {'email_to': False, 'recipient_ids': [(4, pid) for pid in partner_ids]}
+    elif record.partner_email:
+        email_vals = {'email_to': record.partner_email, 'recipient_ids': []}
+    else:
+        continue
+    template.send_mail(record.id, force_send=True, email_values=email_vals)
+&quot;&quot;&quot;,
             })]"/>
         </record>
 
