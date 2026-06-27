@@ -8,14 +8,16 @@
             <field name="partner_to"></field>
             <field name="email_to"></field>
             <field name="body_html"><![CDATA[
-                <p>El ticket <strong>#{{ object.id }}: {{ object.name }}</strong> ha sido asignado a <strong>{{ object.user_id.name }}</strong>.</p>
-                {% if object.partner_id or object.partner_email %}
-                <p>Contacto: {{ object.partner_id.name or object.partner_name }}</p>
-                {% endif %}
-                <p>Descripción: {{ object.description or '—' }}</p>
-                <p>Equipo: {{ object.team_id.name or '—' }}</p>
-                <br/>
-                <p>Equipo de soporte</p>
+                <div>
+                    <p>El ticket <strong>#<t t-esc="object.id"/>: <t t-esc="object.name"/></strong> ha sido asignado a <strong><t t-esc="object.user_id.name"/></strong>.</p>
+                    <t t-if="object.partner_id or object.partner_email">
+                        <p>Contacto: <t t-esc="object.partner_id.name if object.partner_id else object.partner_name"/></p>
+                    </t>
+                    <p>Descripción: <t t-out="object.description or '—'"/></p>
+                    <p>Equipo: <t t-esc="object.team_id.name or '—'"/></p>
+                    <br/>
+                    <p>Equipo de soporte</p>
+                </div>
             ]]></field>
         </record>
 
