@@ -6,11 +6,12 @@ services:
     volumes:
       - ./custom_addons:/mnt/extra-addons
       - odoo_data:/var/lib/odoo
-      - ./odoo.conf:/etc/odoo/odoo.conf
+      - ./odoo.prod.conf:/etc/odoo/odoo.conf
     environment:
       - HOST=${RDS_HOST}
       - USER=${POSTGRES_USER}
       - PASSWORD=${POSTGRES_PASSWORD}
+    # command: odoo -d ${POSTGRES_DB} -i usuarios_iniciales,helpdesk_mgmt --stop-after-init
     networks:
       - odoo_network
 
