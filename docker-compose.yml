@@ -15,6 +15,7 @@ services:
       - USER=odoo
       - PASSWORD=odoo
     # command: odoo -d odoo -i usuarios_iniciales,helpdesk_mgmt --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
+
   db:
     image: postgres:17
     container_name: odoo_db
