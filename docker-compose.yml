@@ -14,7 +14,7 @@ services:
       - HOST=db
       - USER=odoo
       - PASSWORD=odoo
-    # command: odoo -d odoo -i usuarios_iniciales,helpdesk_mgmt --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
+    # command: odoo -d odoo -i usuarios_iniciales,helpdesk_mgmt,oca_helpdesk_reports --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
 
   db:
     image: postgres:17
