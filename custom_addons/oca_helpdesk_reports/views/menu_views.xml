@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_helpdesk_reports_mensual"
+        name="Mensual"
+        parent="helpdesk_mgmt.helpdesk_ticket_reporting_menu"
+        action="action_helpdesk_report_monthly"
+        sequence="10"
+        groups="helpdesk_mgmt.group_helpdesk_manager"
+    />
+</odoo>

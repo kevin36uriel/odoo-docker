@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_report_monthly_wizard_form" model="ir.ui.view">
+        <field name="name">helpdesk.report.monthly.wizard.form</field>
+        <field name="model">helpdesk.report.monthly.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte Mensual de Tickets">
+                <group string="Filtros" col="4">
+                    <field name="date_from" string="Desde"/>
+                    <field name="date_to" string="Hasta"/>
+                    <field name="team_id" string="Equipo"/>
+                    <field name="user_id" string="Agente"/>
+                </group>
+                <group string="Totales" invisible="not report_generated" col="3">
+                    <field name="total_tickets" readonly="1"/>
+                    <field name="total_resolved" readonly="1"/>
+                    <field name="total_pending" readonly="1"/>
+                </group>
+                <field name="line_ids"
+                       invisible="not report_generated"
+                       nolabel="1"
+                       readonly="1">
+                    <list>
+                        <field name="month"/>
+                        <field name="team_name"/>
+                        <field name="user_name"/>
+                        <field name="stage_name"/>
+                        <field name="priority"/>
+                        <field name="total_tickets" sum="Total"/>
+                        <field name="resolved_tickets" sum="Resueltos"/>
+                        <field name="pending_tickets" sum="Pendientes"/>
+                        <field name="avg_resolution_hours" avg="Prom."/>
+                    </list>
+                </field>
+                <field name="report_generated" invisible="1"/>
+                <footer>
+                    <button name="action_generate_report"
+                            type="object"
+                            string="Generar reporte"
+                            class="btn-primary"/>
+                    <button name="action_export_pdf"
+                            type="object"
+                            string="Exportar PDF"
+                            invisible="not report_generated"/>
+                    <button name="action_configurar_diseno"
+                            type="object"
+                            string="Configurar diseño del documento"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_report_monthly" model="ir.actions.act_window">
+        <field name="name">Reporte Mensual</field>
+        <field name="res_model">helpdesk.report.monthly.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

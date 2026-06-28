@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- El action se actualiza con -u (noupdate="0") -->
+    <data noupdate="0">
+        <record id="action_report_monthly_pdf" model="ir.actions.report">
+            <field name="name">Reporte Mensual de Tickets</field>
+            <field name="model">helpdesk.report.monthly.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">oca_helpdesk_reports.report_monthly_pdf_template</field>
+            <field name="report_file">oca_helpdesk_reports.report_monthly_pdf_template</field>
+            <field name="paperformat_id" ref="base.paperformat_euro"/>
+        </record>
+    </data>
+
+    <!--
+        El template está con noupdate="1":
+        Los cambios hechos desde Ajustes → Técnico → Informes → Editar plantilla
+        NO se pierden al hacer -u oca_helpdesk_reports.
+        Para forzar reset desde código, cambiar temporalmente a noupdate="0".
+    -->
+    <data noupdate="1">
+        <template id="report_monthly_pdf_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <style>
+                                @page { size: A4 landscape; }
+                                .report-title { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+                                .report-period { color: #555; margin-bottom: 16px; }
+                                .report-summary { display: flex; gap: 24px; margin-bottom: 16px; }
+                                .summary-box { background: #f0f4ff; border: 1px solid #4B5EA6;
+                                               border-radius: 4px; padding: 8px 16px; text-align: center; }
+                                .summary-box .value { font-size: 20px; font-weight: bold; color: #4B5EA6; }
+                                .summary-box .label { font-size: 11px; color: #555; }
+                                table.report-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+                                table.report-table th {
+                                    background: #4B5EA6; color: white; padding: 6px 8px;
+                                    text-align: center; border: 1px solid #3a4d8a;
+                                }
+                                table.report-table td { padding: 5px 8px; border: 1px solid #ddd; }
+                                table.report-table tr:nth-child(even) td { background: #f2f2f2; }
+                                table.report-table tfoot td {
+                                    background: #d3d3d3; font-weight: bold; border: 1px solid #aaa;
+                                }
+                                .text-right { text-align: right; }
+                                .text-center { text-align: center; }
+                            </style>
+
+                            <div class="report-title">Reporte Mensual de Tickets</div>
+                            <div class="report-period">
+                                Período: <t t-esc="doc.date_from"/> — <t t-esc="doc.date_to"/>
+                            </div>
+
+                            <div class="report-summary">
+                                <div class="summary-box">
+                                    <div class="value"><t t-esc="doc.total_tickets"/></div>
+                                    <div class="label">Total tickets</div>
+                                </div>
+                                <div class="summary-box">
+                                    <div class="value"><t t-esc="doc.total_resolved"/></div>
+                                    <div class="label">Resueltos</div>
+                                </div>
+                                <div class="summary-box">
+                                    <div class="value"><t t-esc="doc.total_pending"/></div>
+                                    <div class="label">Pendientes</div>
+                                </div>
+                            </div>
+
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Equipo</th>
+                                        <th>Agente</th>
+                                        <th>Etapa</th>
+                                        <th>Prioridad</th>
+                                        <th class="text-right">Total</th>
+                                        <th class="text-right">Resueltos</th>
+                                        <th class="text-right">Pendientes</th>
+                                        <th class="text-right">Tiempo prom. (hrs)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.line_ids" t-as="line">
+                                        <tr>
+                                            <td><t t-esc="line.month"/></td>
+                                            <td><t t-esc="line.team_name"/></td>
+                                            <td><t t-esc="line.user_name"/></td>
+                                            <td><t t-esc="line.stage_name"/></td>
+                                            <td class="text-center"><t t-esc="line.priority"/></td>
+                                            <td class="text-right"><t t-esc="line.total_tickets"/></td>
+                                            <td class="text-right"><t t-esc="line.resolved_tickets"/></td>
+                                            <td class="text-right"><t t-esc="line.pending_tickets"/></td>
+                                            <td class="text-right">
+                                                <t t-esc="'%.1f' % line.avg_resolution_hours"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5">TOTAL</td>
+                                        <td class="text-right"><t t-esc="doc.total_tickets"/></td>
+                                        <td class="text-right"><t t-esc="doc.total_resolved"/></td>
+                                        <td class="text-right"><t t-esc="doc.total_pending"/></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
