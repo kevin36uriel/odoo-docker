@@ -1,9 +1,10 @@
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
 
         <!--
             ROLES DISPONIBLES EN ODOO:
             ─────────────────────────────────────────────────────────────────
+            base.user_admin          → Administrador    (acceso total al backend)
             base.group_user          → Usuario interno  (acceso al backend)
             base.group_portal        → Portal           (solo ve su portal web)
             base.group_public        → Público          (sin login, visitantes)
@@ -27,9 +28,9 @@
         </record>
 
         <!-- Usuario interno -->
-        <record id="user_usuario_generic" model="res.users">
-            <field name="name">Usuario</field>
-            <field name="login">usuario</field>
+        <record id="user_tecnico_generic" model="res.users">
+            <field name="name">Tecnico</field>
+            <field name="login">tecnico</field>
             <field name="email">kevin597uriel@gmail.com</field>
             <field name="password">12345</field>
             <field name="lang">es_MX</field>
