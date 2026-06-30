@@ -5,7 +5,7 @@
             <field name="name">Enviar correo al asignar ticket</field>
             <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
             <field name="trigger">on_create_or_write</field>
-            <field name="filter_pre_domain">[['user_id', '=', False]]</field>
+            <field name="trigger_field_ids" eval="[(4, ref('helpdesk_mgmt.field_helpdesk_ticket__user_id'))]"/>
             <field name="filter_domain">[['user_id', '!=', False]]</field>
         </record>
 
@@ -18,16 +18,25 @@
 template = env.ref('helpdesk_mgmt.mail_template_ticket_confirmacion')
 for record in records:
     partner_ids = []
+    # Responsable asignado
     if record.user_id and record.user_id.partner_id:
         partner_ids.append(record.user_id.partner_id.id)
+    # Contacto del ticket (puede ser el mismo que el admin si el correo coincide)
     if record.partner_id and record.partner_id.id not in partner_ids:
         partner_ids.append(record.partner_id.id)
-    if partner_ids:
-        email_vals = {'email_to': False, 'recipient_ids': [(4, pid) for pid in partner_ids]}
-    elif record.partner_email:
-        email_vals = {'email_to': record.partner_email, 'recipient_ids': []}
-    else:
+
+    # Email del remitente original (cuando no hay partner_id o es distinto)
+    email_to_extra = False
+    if record.partner_email and not record.partner_id:
+        email_to_extra = record.partner_email
+
+    if not partner_ids and not email_to_extra:
         continue
+
+    email_vals = {
+        'email_to': email_to_extra or False,
+        'recipient_ids': [(4, pid) for pid in partner_ids],
+    }
     template.send_mail(record.id, force_send=True, email_values=email_vals)
             </field>
         </record>
