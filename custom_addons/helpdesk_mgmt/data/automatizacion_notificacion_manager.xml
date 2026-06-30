@@ -1,0 +1,40 @@
+<odoo>
+    <data noupdate="0">
+
+        <record id="automatizacion_notificacion_ticket_nuevo" model="base.automation">
+            <field name="name">Notificar managers al llegar ticket sin asignar</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="trigger">on_create</field>
+            <field name="filter_domain">[['user_id', '=', False]]</field>
+        </record>
+
+        <record id="action_server_notificar_managers" model="ir.actions.server">
+            <field name="name">Enviar notificación Discuss a managers</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="state">code</field>
+            <field name="base_automation_id" ref="helpdesk_mgmt.automatizacion_notificacion_ticket_nuevo"/>
+            <field name="code">
+manager_group = env.ref('helpdesk_mgmt.group_helpdesk_manager')
+managers = manager_group.users.filtered(lambda u: u.active and not u.share)
+
+for record in records:
+    ticket_url = '/web#model=helpdesk.ticket&amp;id=%d' % record.id
+    remitente = record.partner_name or record.partner_email or 'Sin remitente'
+    body = (
+        '&lt;b&gt;Ticket nuevo sin asignar&lt;/b&gt;&lt;br/&gt;'
+        '&lt;b&gt;Ticket:&lt;/b&gt; &lt;a href="%s"&gt;%s&lt;/a&gt;&lt;br/&gt;'
+        '&lt;b&gt;De:&lt;/b&gt; %s'
+    ) % (ticket_url, record.name, remitente)
+
+    for manager in managers:
+        channel = env['discuss.channel'].sudo().channel_get([manager.partner_id.id])
+        channel.sudo().message_post(
+            body=body,
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )
+            </field>
+        </record>
+
+    </data>
+</odoo>
