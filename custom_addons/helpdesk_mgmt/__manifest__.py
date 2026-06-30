@@ -23,6 +23,7 @@
         "security/ir.model.access.csv",
         "data/mail_template_ticket_creado.xml",
         "data/automatizacion_ticket_creado.xml",
+        "data/automatizacion_notificacion_manager.xml",
         "views/res_partner_views.xml",
         "views/res_config_settings_views.xml",
         "views/helpdesk_ticket_templates.xml",
