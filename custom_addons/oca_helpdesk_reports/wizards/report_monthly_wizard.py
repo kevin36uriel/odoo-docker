@@ -157,7 +157,7 @@ class HelpdeskReportMonthlyWizard(models.TransientModel):
         )
 
     def action_export_excel(self):
-        if not self.line_ids:
+        if not self.report_generated:
             raise UserError(_("Primero genere el reporte antes de exportar."))
 
         try:
@@ -167,113 +167,67 @@ class HelpdeskReportMonthlyWizard(models.TransientModel):
                 _("La librería xlsxwriter no está disponible. Contacte al administrador.")
             )
 
+        domain = self._build_domain()
+        tickets = self.env["helpdesk.ticket"].search(domain, order="create_date desc")
+
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
-        sheet = workbook.add_worksheet("Reporte Mensual")
+        sheet = workbook.add_worksheet("Reporte")
 
-        # --- Formatos ---
-        title_fmt = workbook.add_format(
-            {"bold": True, "font_size": 14, "font_color": "#4B5EA6"}
-        )
-        period_fmt = workbook.add_format({"italic": True, "font_color": "#555555"})
-        summary_label_fmt = workbook.add_format(
-            {"bold": True, "bg_color": "#f0f4ff", "border": 1,
-             "align": "center", "font_color": "#555555", "font_size": 9}
-        )
-        summary_value_fmt = workbook.add_format(
-            {"bold": True, "bg_color": "#f0f4ff", "border": 1,
-             "align": "center", "font_size": 14, "font_color": "#4B5EA6"}
-        )
-        header_fmt = workbook.add_format(
-            {"bold": True, "bg_color": "#4B5EA6", "font_color": "white",
-             "border": 1, "align": "center", "valign": "vcenter"}
-        )
-        footer_fmt = workbook.add_format(
-            {"bold": True, "bg_color": "#d3d3d3", "border": 1, "valign": "vcenter"}
-        )
-        footer_right_fmt = workbook.add_format(
-            {"bold": True, "bg_color": "#d3d3d3", "border": 1,
-             "align": "right", "valign": "vcenter"}
-        )
+        header_fmt = workbook.add_format({
+            "bold": True,
+            "bg_color": "#17375E",
+            "font_color": "white",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": 11,
+        })
 
-        def _row_fmts(even):
-            bg = "#f2f2f2" if even else "white"
-            base = {"border": 1, "valign": "vcenter", "bg_color": bg}
-            return (
-                workbook.add_format(base),
-                workbook.add_format({**base, "align": "center"}),
-                workbook.add_format({**base, "align": "right"}),
-                workbook.add_format({**base, "align": "right", "num_format": "0.0"}),
-            )
+        fmt_blue_left   = workbook.add_format({"bg_color": "#D6E4F0", "valign": "vcenter", "align": "left",   "font_size": 11})
+        fmt_blue_center = workbook.add_format({"bg_color": "#D6E4F0", "valign": "vcenter", "align": "center", "font_size": 11})
+        fmt_white_left  = workbook.add_format({"bg_color": "white",   "valign": "vcenter", "align": "left",   "font_size": 11})
+        fmt_white_center= workbook.add_format({"bg_color": "white",   "valign": "vcenter", "align": "center", "font_size": 11})
 
-        odd_fmts = _row_fmts(False)
-        even_fmts = _row_fmts(True)
+        sheet.set_column(0, 0, 65)   # Incidencia
+        sheet.set_column(1, 1, 17)   # Fecha de creación
+        sheet.set_column(2, 2, 17)   # Hora de creación
+        sheet.set_column(3, 3, 12)   # Prioridad
+        sheet.set_column(4, 4, 10)   # Nivel
+        sheet.set_default_row(18)
 
-        # --- Anchos de columna ---
-        sheet.set_column(0, 0, 11)   # Mes
-        sheet.set_column(1, 1, 22)   # Equipo
-        sheet.set_column(2, 2, 22)   # Agente
-        sheet.set_column(3, 3, 16)   # Etapa
-        sheet.set_column(4, 4, 11)   # Prioridad
-        sheet.set_column(5, 5, 8)    # Total
-        sheet.set_column(6, 6, 11)   # Resueltos
-        sheet.set_column(7, 7, 11)   # Pendientes
-        sheet.set_column(8, 8, 20)   # Tiempo prom.
-
-        row = 0
-
-        # Título
-        sheet.merge_range(row, 0, row, 8, "Reporte Mensual de Tickets", title_fmt)
-        row += 1
-
-        # Período
-        sheet.merge_range(
-            row, 0, row, 8,
-            f"Período: {self.date_from} — {self.date_to}",
-            period_fmt,
-        )
-        row += 2
-
-        # Resumen
-        sheet.write(row, 0, "Total tickets", summary_label_fmt)
-        sheet.write(row, 1, "Resueltos", summary_label_fmt)
-        sheet.write(row, 2, "Pendientes", summary_label_fmt)
-        row += 1
-        sheet.write(row, 0, self.total_tickets, summary_value_fmt)
-        sheet.write(row, 1, self.total_resolved, summary_value_fmt)
-        sheet.write(row, 2, self.total_pending, summary_value_fmt)
-        row += 2
-
-        # Encabezado de tabla
         headers = [
-            "Mes", "Equipo", "Agente", "Etapa", "Prioridad",
-            "Total", "Resueltos", "Pendientes", "Tiempo prom. (hrs)",
+            "Incidencia", "Fecha de creación", "Hora de creación", "Prioridad", "Nivel"
         ]
         for col, h in enumerate(headers):
-            sheet.write(row, col, h, header_fmt)
-        sheet.freeze_panes(row + 1, 0)
-        row += 1
+            sheet.write(0, col, h, header_fmt)
+        sheet.set_row(0, 22)
+        sheet.autofilter(0, 0, 0, 4)
+        sheet.freeze_panes(1, 0)
 
-        # Filas de datos
-        for i, line in enumerate(self.line_ids):
-            f, fc, fr, ff = even_fmts if i % 2 else odd_fmts
-            sheet.write(row, 0, line.month, f)
-            sheet.write(row, 1, line.team_name, f)
-            sheet.write(row, 2, line.user_name, f)
-            sheet.write(row, 3, line.stage_name, f)
-            sheet.write(row, 4, line.priority, fc)
-            sheet.write(row, 5, line.total_tickets, fr)
-            sheet.write(row, 6, line.resolved_tickets, fr)
-            sheet.write(row, 7, line.pending_tickets, fr)
-            sheet.write(row, 8, line.avg_resolution_hours, ff)
-            row += 1
+        for i, ticket in enumerate(tickets):
+            blue_row = (i % 2 == 0)
+            txt_fmt    = fmt_blue_left   if blue_row else fmt_white_left
+            center_fmt = fmt_blue_center if blue_row else fmt_white_center
+            row = i + 1
 
-        # Fila de totales
-        sheet.merge_range(row, 0, row, 4, "TOTAL", footer_fmt)
-        sheet.write(row, 5, self.total_tickets, footer_right_fmt)
-        sheet.write(row, 6, self.total_resolved, footer_right_fmt)
-        sheet.write(row, 7, self.total_pending, footer_right_fmt)
-        sheet.write(row, 8, "", footer_fmt)
+            if ticket.create_date:
+                local_dt = fields.Datetime.context_timestamp(ticket, ticket.create_date)
+                date_str = local_dt.strftime("%-d/%-m/%Y")
+                time_str = (
+                    local_dt.strftime("%-I:%M:%S %p")
+                    .lower()
+                    .replace("am", "a.m.")
+                    .replace("pm", "p.m.")
+                )
+            else:
+                date_str = ""
+                time_str = ""
+
+            sheet.write(row, 0, ticket.name or "", txt_fmt)
+            sheet.write(row, 1, date_str, center_fmt)
+            sheet.write(row, 2, time_str, center_fmt)
+            sheet.write(row, 3, _PRIORITY_LABELS.get(ticket.priority or "0", ""), center_fmt)
+            sheet.write(row, 4, "", center_fmt)
 
         workbook.close()
 
