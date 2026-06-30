@@ -16,7 +16,9 @@
                     <p>Descripción: <t t-out="object.description or '—'"/></p>
                     <p>Equipo: <t t-esc="object.team_id.name or '—'"/></p>
                     <br/>
-                    <p>Equipo de soporte</p>
+                    <hr/>
+                    <p><strong><t t-esc="object.name"/> (#<t t-esc="object.id"/>)</strong></p>
+                    <hr/>
                 </div>
             ]]></field>
         </record>
