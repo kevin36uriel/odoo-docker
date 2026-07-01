@@ -1,0 +1,47 @@
+<odoo>
+    <data noupdate="0">
+
+        <record id="automatizacion_correo_ticket_cerrado" model="base.automation">
+            <field name="name">Enviar resumen PDF al cerrar ticket</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="trigger">on_create_or_write</field>
+            <field name="trigger_field_ids" eval="[(4, ref('helpdesk_mgmt.field_helpdesk_ticket__stage_id'))]"/>
+            <!-- Solo cuando pasa de etapa abierta → cerrada (evita reenvíos) -->
+            <field name="filter_pre_domain">[['stage_id.closed', '=', False]]</field>
+            <field name="filter_domain">[['stage_id.closed', '=', True]]</field>
+        </record>
+
+        <record id="action_server_ticket_cerrado" model="ir.actions.server">
+            <field name="name">Enviar correo con PDF al cerrar ticket</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
+            <field name="state">code</field>
+            <field name="base_automation_id" ref="helpdesk_mgmt.automatizacion_correo_ticket_cerrado"/>
+            <field name="code">
+template = env.ref('helpdesk_mgmt.mail_template_ticket_cerrado')
+for record in records:
+    partner_ids = []
+    # Responsable asignado
+    if record.user_id and record.user_id.partner_id:
+        partner_ids.append(record.user_id.partner_id.id)
+    # Contacto del ticket
+    if record.partner_id and record.partner_id.id not in partner_ids:
+        partner_ids.append(record.partner_id.id)
+
+    # Email directo si no hay partner_id vinculado
+    email_to_extra = False
+    if record.partner_email and not record.partner_id:
+        email_to_extra = record.partner_email
+
+    if not partner_ids and not email_to_extra:
+        continue
+
+    email_vals = {
+        'email_to': email_to_extra or False,
+        'recipient_ids': [(4, pid) for pid in partner_ids],
+    }
+    template.send_mail(record.id, force_send=True, email_values=email_vals)
+            </field>
+        </record>
+
+    </data>
+</odoo>

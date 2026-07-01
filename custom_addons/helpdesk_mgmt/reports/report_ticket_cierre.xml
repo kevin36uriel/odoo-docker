@@ -1,0 +1,98 @@
+<odoo>
+    <data noupdate="0">
+        <record id="action_report_ticket_cierre" model="ir.actions.report">
+            <field name="name">Resumen de Ticket</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">helpdesk_mgmt.report_ticket_cierre_document</field>
+            <field name="report_file">helpdesk_mgmt.report_ticket_cierre_document</field>
+            <field name="print_report_name">'Resumen_Ticket_' + object.number</field>
+        </record>
+    </data>
+    <data noupdate="0">
+        <template id="report_ticket_cierre_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2 style="margin-bottom: 16px;">
+                                Resumen de Ticket #<t t-esc="o.number"/> — <t t-esc="o.name"/>
+                            </h2>
+
+                            <!-- Datos generales -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0; width: 30%;">Cliente</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.partner_id.name or o.partner_name or '—'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Equipo</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.team_id.name or '—'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Responsable</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.user_id.name or '—'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Prioridad</th>
+                                    <td style="padding: 6px 8px;">
+                                        <t t-if="o.priority == '0'">Baja</t>
+                                        <t t-elif="o.priority == '1'">Media</t>
+                                        <t t-elif="o.priority == '2'">Alta</t>
+                                        <t t-elif="o.priority == '3'">Muy Alta</t>
+                                    </td>
+                                </tr>
+                                <tr t-if="o.category_id">
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Categoría</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.category_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Fecha de creación</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.create_date.strftime('%d/%m/%Y %H:%M') if o.create_date else '—'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Fecha de asignación</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.assigned_date.strftime('%d/%m/%Y %H:%M') if o.assigned_date else '—'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: left; padding: 6px 8px; background: #f0f0f0;">Fecha de cierre</th>
+                                    <td style="padding: 6px 8px;"><t t-esc="o.closed_date.strftime('%d/%m/%Y %H:%M') if o.closed_date else '—'"/></td>
+                                </tr>
+                            </table>
+
+                            <!-- Descripción -->
+                            <h3 style="border-bottom: 2px solid #ccc; padding-bottom: 4px;">Descripción</h3>
+                            <div style="margin-bottom: 24px; padding: 8px; background: #fafafa; border-left: 3px solid #ddd;">
+                                <t t-out="o.description or '&lt;em&gt;Sin descripción.&lt;/em&gt;'"/>
+                            </div>
+
+                            <!-- Historial completo: actividades completadas, cambios de estado y mensajes -->
+                            <h3 style="border-bottom: 2px solid #ccc; padding-bottom: 4px;">Historial del ticket</h3>
+                            <t t-set="mensajes" t-value="o.message_ids.filtered(lambda m: m.body and m.message_type in ('comment', 'email', 'notification')).sorted('date')"/>
+                            <t t-if="mensajes">
+                                <t t-foreach="mensajes" t-as="msg">
+                                    <div style="border-left: 3px solid #a0a0a0; padding: 6px 12px; margin-bottom: 12px; background: #fafafa;">
+                                        <p style="margin: 0 0 4px 0; font-size: 0.85em; color: #555;">
+                                            <strong><t t-esc="msg.author_id.name or 'Sistema'"/></strong>
+                                            <span style="margin: 0 6px;">—</span>
+                                            <t t-esc="msg.date.strftime('%d/%m/%Y %H:%M') if msg.date else ''"/>
+                                            <t t-if="msg.subtype_id">
+                                                <span style="margin-left: 8px; color: #888; font-style: italic;">
+                                                    (<t t-esc="msg.subtype_id.name"/>)
+                                                </span>
+                                            </t>
+                                        </p>
+                                        <div style="font-size: 0.95em;"><t t-out="msg.body"/></div>
+                                    </div>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <p><em>Sin historial registrado en este ticket.</em></p>
+                            </t>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
