@@ -21,6 +21,7 @@
         "data/helpdesk_data.xml",
         "security/helpdesk_security.xml",
         "security/ir.model.access.csv",
+        "data/logo_attachment.xml",
         "data/mail_template_ticket_creado.xml",
         "data/automatizacion_ticket_creado.xml",
         "data/automatizacion_notificacion_manager.xml",
