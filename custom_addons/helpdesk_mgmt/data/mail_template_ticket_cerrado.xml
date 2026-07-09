@@ -154,6 +154,9 @@
                   <p style="margin:2px 0 0 0;font-size:11px;color:#aaaaaa;">
                     Correo autom&#225;tico &#x2014; no responder directamente a este mensaje.
                   </p>
+                  <p style="margin:6px 0 0 0;font-size:11px;color:#aaaaaa;">
+                    <t t-esc="object.name"/> (#<t t-esc="object.id"/>)
+                  </p>
                 </td>
               </tr>
             </table>

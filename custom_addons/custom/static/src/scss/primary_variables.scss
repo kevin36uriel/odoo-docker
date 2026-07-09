@@ -1,0 +1,8 @@
+// Colores de marca Punto Singular.
+// Se cargan ANTES de web/static/src/scss/primary_variables.scss (ver 'assets'
+// en __manifest__.py) para que las variables originales, definidas con
+// !default, respeten estos valores.
+
+$o-brand-odoo: #122A59;
+$o-brand-primary: #122A59;
+$o-action: #3B8EDE;

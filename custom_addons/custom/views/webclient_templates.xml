@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="web_layout_favicon" inherit_id="web.layout" name="Punto Singular - Favicon">
+        <xpath expr="//link[@rel='shortcut icon']" position="attributes">
+            <attribute name="t-att-href">x_icon or '/custom/static/img/favicon.ico'</attribute>
+        </xpath>
+    </template>
+
+</odoo>
