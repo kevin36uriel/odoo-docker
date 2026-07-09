@@ -3,6 +3,7 @@ from pathlib import Path
 
 LOGO_PATH = Path(__file__).parent / 'logos' / 'Punto-Singular-WEB.png'
 
+COMPANY_NAME = 'Punto Singular'
 PRIMARY_COLOR = '#122A59'
 SECONDARY_COLOR = '#3B8EDE'
 
@@ -12,6 +13,7 @@ def post_init_hook(env):
     report_layout = env.ref('web.external_layout_standard', raise_if_not_found=False)
     companies = env['res.company'].search([])
     companies.write({
+        'name': COMPANY_NAME,
         'logo': logo_b64,
         'primary_color': PRIMARY_COLOR,
         'secondary_color': SECONDARY_COLOR,
