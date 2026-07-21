@@ -1,7 +1,8 @@
 import base64
 import io
+import math
 
-from odoo import _, models
+from odoo import models
 
 _MESES_ES = [
     "",
@@ -27,8 +28,6 @@ _TEXT = (55, 58, 66)
 _FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 _FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-_MAX_CHART_ROWS = 10
-
 
 def _format_date_es(d):
     if not d:
@@ -36,66 +35,59 @@ def _format_date_es(d):
     return "%d de %s de %d" % (d.day, _MESES_ES[d.month], d.year)
 
 
-def _build_chart_png(rows, width=1400):
-    """rows: [(label, completed, pending), ...], ya ordenadas y acotadas."""
+def _build_pie_chart_png(completed, pending, width=1400):
+    """Pastel de 2 rebanadas: tickets completados vs. pendientes."""
     from PIL import Image, ImageDraw, ImageFont
 
     try:
         font_title = ImageFont.truetype(_FONT_BOLD, 34)
-        font_label = ImageFont.truetype(_FONT_REGULAR, 24)
-        font_value = ImageFont.truetype(_FONT_BOLD, 24)
+        font_label = ImageFont.truetype(_FONT_BOLD, 26)
         font_legend = ImageFont.truetype(_FONT_REGULAR, 24)
     except OSError:
-        font_title = font_label = font_value = font_legend = ImageFont.load_default()
+        font_title = font_label = font_legend = ImageFont.load_default()
 
     top_pad = 96
-    bar_h = 46
-    bar_gap = 24
+    circle_d = 520
     bottom_pad = 90
-    label_col = 340
-    right_pad = 90
-    bar_area = width - label_col - right_pad
+    height = top_pad + circle_d + bottom_pad + 60
 
-    height = top_pad + len(rows) * (bar_h + bar_gap) + bottom_pad
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
 
     draw.text(
         (40, 34),
-        "Tickets por agente — completados vs. pendientes",
+        "Tickets completados vs. pendientes",
         font=font_title,
         fill=_NAVY,
     )
 
-    max_total = max((c + p for _l, c, p in rows), default=0) or 1
+    total = completed + pending
+    cx, cy, r = width / 2, top_pad + circle_d / 2, circle_d / 2
+    bbox = [cx - r, cy - r, cx + r, cy + r]
 
-    y = top_pad
-    for label, completed, pending in rows:
-        total = completed + pending
-        draw.rectangle([label_col, y, label_col + bar_area, y + bar_h], fill=_TRACK)
-        c_w = int(bar_area * completed / max_total)
-        p_w = int(bar_area * pending / max_total)
-        if c_w:
-            draw.rectangle([label_col, y, label_col + c_w, y + bar_h], fill=_NAVY)
-        if p_w:
-            draw.rectangle(
-                [label_col + c_w, y, label_col + c_w + p_w, y + bar_h], fill=_BLUE
-            )
-
-        text = label if len(label) <= 28 else label[:26] + "…"
+    def _label(angle_mid_deg, count, color):
+        rad = math.radians(angle_mid_deg)
+        anchor_x, anchor_y = cx + r * math.cos(rad), cy + r * math.sin(rad)
+        lx, ly = cx + (r + 40) * math.cos(rad), cy + (r + 40) * math.sin(rad)
+        draw.line([anchor_x, anchor_y, lx, ly], fill=color, width=3)
+        text = "%d (%.0f%%)" % (count, 100.0 * count / total)
         tw = draw.textlength(text, font=font_label)
-        draw.text(
-            (label_col - 20 - tw, y + bar_h / 2 - 14), text, font=font_label, fill=_TEXT
-        )
-        draw.text(
-            (label_col + bar_area + 16, y + bar_h / 2 - 13),
-            str(total),
-            font=font_value,
-            fill=_TEXT,
-        )
-        y += bar_h + bar_gap
+        tx = lx + 10 if math.cos(rad) >= 0 else lx - 10 - tw
+        draw.text((tx, ly - 15), text, font=font_label, fill=_TEXT)
 
-    ly = height - bottom_pad + 26
+    if total:
+        start = -90.0
+        completed_angle = 360.0 * completed / total
+        if completed:
+            draw.pieslice(bbox, start, start + completed_angle, fill=_NAVY)
+            _label(start + completed_angle / 2, completed, _NAVY)
+        if pending:
+            draw.pieslice(bbox, start + completed_angle, start + 360, fill=_BLUE)
+            _label(start + completed_angle + (360 - completed_angle) / 2, pending, _BLUE)
+    else:
+        draw.ellipse(bbox, fill=_TRACK)
+
+    ly = height - bottom_pad + 10
     draw.rounded_rectangle([40, ly, 72, ly + 26], radius=5, fill=_NAVY)
     draw.text((82, ly + 1), "Completados", font=font_legend, fill=_TEXT)
     lx2 = 82 + draw.textlength("Completados", font=font_legend) + 50
@@ -124,34 +116,6 @@ class ReportHelpdeskMonthlyPdf(models.AbstractModel):
             completed = tickets.filtered(lambda t: t.stage_id.closed)
             pending = tickets - completed
 
-            by_agent = {}
-            for ticket in tickets:
-                agent = ticket.user_id.name or _("Sin asignar")
-                row = by_agent.setdefault(agent, {"completed": 0, "pending": 0})
-                if ticket.stage_id.closed:
-                    row["completed"] += 1
-                else:
-                    row["pending"] += 1
-
-            agent_rows = sorted(
-                by_agent.items(),
-                key=lambda kv: kv[1]["completed"] + kv[1]["pending"],
-                reverse=True,
-            )
-            chart_rows = [
-                (name, v["completed"], v["pending"])
-                for name, v in agent_rows[:_MAX_CHART_ROWS]
-            ]
-            rest = agent_rows[_MAX_CHART_ROWS:]
-            if rest:
-                chart_rows.append(
-                    (
-                        _("Otros (%s agentes)") % len(rest),
-                        sum(v["completed"] for _n, v in rest),
-                        sum(v["pending"] for _n, v in rest),
-                    )
-                )
-
             report_data[wizard.id] = {
                 "completed": completed[: self._max_listed],
                 "completed_extra": max(0, len(completed) - self._max_listed),
@@ -159,7 +123,11 @@ class ReportHelpdeskMonthlyPdf(models.AbstractModel):
                 "pending_extra": max(0, len(pending) - self._max_listed),
                 "date_from_es": _format_date_es(wizard.date_from),
                 "date_to_es": _format_date_es(wizard.date_to),
-                "chart_b64": _build_chart_png(chart_rows) if chart_rows else False,
+                "chart_b64": (
+                    _build_pie_chart_png(len(completed), len(pending))
+                    if tickets
+                    else False
+                ),
             }
 
         return {
