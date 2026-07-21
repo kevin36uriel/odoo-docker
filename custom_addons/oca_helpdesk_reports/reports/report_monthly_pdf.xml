@@ -55,7 +55,8 @@
                                 .rm-empty { color: #888; font-size: 11.5px; font-style: italic; padding: 6px 0 12px 0; }
                                 .rm-extra-note { color: #888; font-size: 10.5px; font-style: italic; margin-top: 2px; }
 
-                                .rm-chart-wrap { text-align: center; margin-top: 22px; page-break-inside: avoid; }
+                                .rm-chart-section { page-break-inside: avoid; margin-top: 18px; }
+                                .rm-chart-wrap { text-align: center; margin-top: 8px; }
                                 .rm-chart-wrap img { max-width: 100%; }
                             </style>
 
@@ -124,12 +125,63 @@
                                 No quedaron tickets pendientes en el período seleccionado.
                             </div>
 
-                            <div class="rm-chart-wrap">
-                                <img t-if="rd['chart_b64']"
-                                     t-att-src="'data:image/png;base64,' + rd['chart_b64']"
-                                     alt="Gráfica de tickets completados vs. pendientes"/>
-                                <div class="rm-empty" t-else="">
-                                    No hay datos suficientes para generar la gráfica.
+                            <div class="rm-chart-section">
+                                <div class="rm-section-title">Tickets completados vs. pendientes</div>
+                                <div class="rm-chart-wrap">
+                                    <img t-if="rd['chart_b64']"
+                                         t-att-src="'data:image/png;base64,' + rd['chart_b64']"
+                                         alt="Gráfica de tickets completados vs. pendientes"/>
+                                    <div class="rm-empty" t-else="">
+                                        No hay datos suficientes para generar la gráfica.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rm-chart-section">
+                                <div class="rm-section-title">Tickets por prioridad y etapa</div>
+                                <div class="rm-chart-wrap">
+                                    <img t-if="rd['priority_chart_b64']"
+                                         t-att-src="'data:image/png;base64,' + rd['priority_chart_b64']"
+                                         alt="Gráfica de tickets por prioridad y etapa"/>
+                                    <div class="rm-empty" t-else="">
+                                        No hay datos suficientes para generar la gráfica.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rm-chart-section">
+                                <div class="rm-section-title">Tickets atendidos por agente</div>
+                                <div class="rm-chart-wrap">
+                                    <img t-if="rd['agent_chart_b64']"
+                                         t-att-src="'data:image/png;base64,' + rd['agent_chart_b64']"
+                                         alt="Gráfica de tickets por agente"/>
+                                    <div class="rm-empty" t-else="">
+                                        No hay datos suficientes para generar la gráfica.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rm-chart-section">
+                                <div class="rm-section-title">Distribución por día de la semana</div>
+                                <div class="rm-chart-wrap">
+                                    <img t-if="rd['weekday_chart_b64']"
+                                         t-att-src="'data:image/png;base64,' + rd['weekday_chart_b64']"
+                                         alt="Gráfica de tickets por día de la semana"/>
+                                    <div class="rm-empty" t-else="">
+                                        No hay datos suficientes para generar la gráfica.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rm-chart-section">
+                                <div class="rm-section-title">Distribución por horario de llegada</div>
+                                <div class="rm-chart-wrap">
+                                    <img t-if="rd['hourly_chart_b64']"
+                                         t-att-src="'data:image/png;base64,' + rd['hourly_chart_b64']"
+                                         alt="Gráfica de tickets por horario de llegada"/>
+                                    <div class="rm-empty" t-else="">
+                                        No hay datos suficientes para generar la gráfica.
+                                    </div>
                                 </div>
                             </div>
                         </div>

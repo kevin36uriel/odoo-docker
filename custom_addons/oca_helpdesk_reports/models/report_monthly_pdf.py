@@ -2,7 +2,7 @@ import base64
 import io
 import math
 
-from odoo import models
+from odoo import fields, models
 
 _MESES_ES = [
     "",
@@ -19,6 +19,21 @@ _MESES_ES = [
     "noviembre",
     "diciembre",
 ]
+
+_DIAS_SEMANA_ES = [
+    "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo",
+]
+
+_FRANJAS_HORARIAS = [
+    "%02d-%02d" % (h, h + 2) for h in range(0, 24, 2)
+]
+
+_PRIORITY_LABELS = {
+    "0": "Baja",
+    "1": "Media",
+    "2": "Alta",
+    "3": "Muy Alta",
+}
 
 _NAVY = (18, 42, 89)
 _BLUE = (59, 142, 222)
@@ -40,26 +55,18 @@ def _build_pie_chart_png(completed, pending, width=1400):
     from PIL import Image, ImageDraw, ImageFont
 
     try:
-        font_title = ImageFont.truetype(_FONT_BOLD, 34)
         font_label = ImageFont.truetype(_FONT_BOLD, 26)
         font_legend = ImageFont.truetype(_FONT_REGULAR, 24)
     except OSError:
-        font_title = font_label = font_legend = ImageFont.load_default()
+        font_label = font_legend = ImageFont.load_default()
 
-    top_pad = 96
+    top_pad = 36
     circle_d = 520
     bottom_pad = 90
     height = top_pad + circle_d + bottom_pad + 60
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
-
-    draw.text(
-        (40, 34),
-        "Tickets completados vs. pendientes",
-        font=font_title,
-        fill=_NAVY,
-    )
 
     total = completed + pending
     cx, cy, r = width / 2, top_pad + circle_d / 2, circle_d / 2
@@ -99,6 +106,145 @@ def _build_pie_chart_png(completed, pending, width=1400):
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
+def _build_bar_chart_png(categories, series_data, width=1400):
+    """Barras verticales, con 1 o varias series apiladas.
+
+    series_data: lista de (etiqueta, color, valores) — valores alineado con categories.
+    Devuelve None si no hay ninguna categoría con datos (evita gráficas vacías).
+    El título de la sección lo pone el HTML, no la imagen.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    n = len(categories)
+    totals = [sum(s[2][i] for s in series_data) for i in range(n)] if n else []
+    if not totals or not any(totals):
+        return None
+
+    try:
+        font_axis = ImageFont.truetype(_FONT_REGULAR, 22)
+        font_value = ImageFont.truetype(_FONT_BOLD, 22)
+        font_legend = ImageFont.truetype(_FONT_REGULAR, 24)
+    except OSError:
+        font_axis = font_value = font_legend = ImageFont.load_default()
+
+    long_labels = any(len(c) > 8 for c in categories)
+    left_pad, right_pad = 90, 40
+    top_pad = 30
+    chart_h = 480
+    bottom_pad = 170 if long_labels else 110
+    legend_h = 60 if len(series_data) > 1 else 0
+    height = top_pad + chart_h + bottom_pad + legend_h
+
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+
+    steps = 4
+    step_val = max(1, math.ceil(max(totals) / steps))
+    max_val = step_val * steps
+
+    plot_w = width - left_pad - right_pad
+    plot_bottom = top_pad + chart_h
+
+    for i in range(steps + 1):
+        y = plot_bottom - (chart_h * i / steps)
+        draw.line([left_pad, y, width - right_pad, y], fill=_TRACK, width=1)
+        val_label = step_val * i
+        tw = draw.textlength(str(val_label), font=font_axis)
+        draw.text((left_pad - 16 - tw, y - 12), str(val_label), font=font_axis, fill=_TEXT)
+
+    slot_w = plot_w / n
+    bar_w = min(90, slot_w * 0.5)
+
+    for i, cat in enumerate(categories):
+        cx = left_pad + slot_w * i + slot_w / 2
+        y_cursor = plot_bottom
+        for _label, color, values in series_data:
+            val = values[i]
+            if val <= 0:
+                continue
+            bar_h = chart_h * val / max_val
+            draw.rectangle([cx - bar_w / 2, y_cursor - bar_h, cx + bar_w / 2, y_cursor], fill=color)
+            y_cursor -= bar_h
+
+        if totals[i] > 0:
+            text = str(totals[i])
+            tw = draw.textlength(text, font=font_value)
+            top_y = plot_bottom - (chart_h * totals[i] / max_val)
+            draw.text((cx - tw / 2, top_y - 30), text, font=font_value, fill=_TEXT)
+
+        if long_labels:
+            txt_img = Image.new("RGBA", (200, 30), (255, 255, 255, 0))
+            tdraw = ImageDraw.Draw(txt_img)
+            tdraw.text((0, 0), cat, font=font_axis, fill=_TEXT)
+            txt_img = txt_img.rotate(35, expand=True, resample=Image.BICUBIC)
+            img.paste(txt_img, (int(cx - txt_img.width / 2), int(plot_bottom + 14)), txt_img)
+        else:
+            tw = draw.textlength(cat, font=font_axis)
+            draw.text((cx - tw / 2, plot_bottom + 14), cat, font=font_axis, fill=_TEXT)
+
+    if len(series_data) > 1:
+        lx = 40
+        ly = height - legend_h + 10
+        for label, color, _values in series_data:
+            draw.rounded_rectangle([lx, ly, lx + 28, ly + 22], radius=4, fill=color)
+            draw.text((lx + 36, ly), label, font=font_legend, fill=_TEXT)
+            lx += 36 + draw.textlength(label, font=font_legend) + 40
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def _weekday_chart(tickets):
+    counts = [0] * 7
+    for ticket in tickets:
+        if not ticket.create_date:
+            continue
+        local_dt = fields.Datetime.context_timestamp(ticket, ticket.create_date)
+        counts[local_dt.weekday()] += 1
+    return _build_bar_chart_png(_DIAS_SEMANA_ES, [("Tickets", _NAVY, counts)])
+
+
+def _hourly_chart(tickets):
+    counts = [0] * 12
+    for ticket in tickets:
+        if not ticket.create_date:
+            continue
+        local_dt = fields.Datetime.context_timestamp(ticket, ticket.create_date)
+        counts[local_dt.hour // 2] += 1
+    return _build_bar_chart_png(_FRANJAS_HORARIAS, [("Tickets", _BLUE, counts)])
+
+
+def _priority_chart(tickets):
+    order = ["Baja", "Media", "Alta", "Muy Alta"]
+    resolved = {label: 0 for label in order}
+    pending = {label: 0 for label in order}
+    for ticket in tickets:
+        label = _PRIORITY_LABELS.get(ticket.priority or "0", "Baja")
+        if ticket.stage_id.closed:
+            resolved[label] += 1
+        else:
+            pending[label] += 1
+    return _build_bar_chart_png(
+        order,
+        [
+            ("Resueltos", _NAVY, [resolved[label] for label in order]),
+            ("Pendientes", _BLUE, [pending[label] for label in order]),
+        ],
+    )
+
+
+def _agent_chart(tickets):
+    counts = {}
+    for ticket in tickets:
+        name = ticket.user_id.name or "Sin asignar"
+        counts[name] = counts.get(name, 0) + 1
+    ordered = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+    labels = [name for name, _count in ordered]
+    values = [count for _name, count in ordered]
+    return _build_bar_chart_png(labels, [("Tickets", _NAVY, values)])
+
+
 class ReportHelpdeskMonthlyPdf(models.AbstractModel):
     _name = "report.oca_helpdesk_reports.report_monthly_pdf_template"
     _description = "Valores del reporte mensual de tickets (PDF)"
@@ -128,6 +274,10 @@ class ReportHelpdeskMonthlyPdf(models.AbstractModel):
                     if tickets
                     else False
                 ),
+                "weekday_chart_b64": _weekday_chart(tickets) if tickets else False,
+                "hourly_chart_b64": _hourly_chart(tickets) if tickets else False,
+                "priority_chart_b64": _priority_chart(tickets) if tickets else False,
+                "agent_chart_b64": _agent_chart(tickets) if tickets else False,
             }
 
         return {
