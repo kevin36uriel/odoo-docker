@@ -227,7 +227,7 @@ class HelpdeskReportMonthlyWizard(models.TransientModel):
             sheet.write(row, 1, date_str, center_fmt)
             sheet.write(row, 2, time_str, center_fmt)
             sheet.write(row, 3, _PRIORITY_LABELS.get(ticket.priority or "0", ""), center_fmt)
-            sheet.write(row, 4, "", center_fmt)
+            sheet.write(row, 4, ticket.category_id.name or "", center_fmt)
 
         workbook.close()
 
