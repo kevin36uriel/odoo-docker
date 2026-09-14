@@ -1,5 +1,6 @@
 import email
 import logging
+import re
 from xmlrpc import client as xmlrpclib
 
 from odoo import models
@@ -8,6 +9,8 @@ _logger = logging.getLogger(__name__)
 
 # (RFC 2076 / uso de facto en newsletters y notificaciones automáticas).
 AUTO_PRECEDENCE_VALUES = {"bulk", "auto_reply", "junk", "list"}
+
+DMARC_RESULT_RE = re.compile(r"dmarc=(\w+)", re.IGNORECASE)
 
 
 class MailThread(models.AbstractModel):
@@ -58,5 +61,18 @@ class MailThread(models.AbstractModel):
 
         if parsed.get("List-Id") or parsed.get("List-Unsubscribe"):
             return "header List-Id/List-Unsubscribe presente"
+
+        spam_flag = (parsed.get("X-Spam-Flag") or "").strip().lower()
+        if spam_flag == "yes":
+            return "X-Spam-Flag: YES"
+
+        spam_status = (parsed.get("X-Spam-Status") or "").strip().lower()
+        if spam_status.startswith("yes"):
+            return "X-Spam-Status: %s" % spam_status
+
+        auth_results = parsed.get("Authentication-Results") or ""
+        dmarc_match = DMARC_RESULT_RE.search(auth_results)
+        if dmarc_match and dmarc_match.group(1).lower() == "fail":
+            return "Authentication-Results: dmarc=fail"
 
         return None
