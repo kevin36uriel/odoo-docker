@@ -1,10 +1,10 @@
 <odoo>
     <data noupdate="0">
 
-        <record id="mail_template_ticket_confirmacion" model="mail.template">
-            <field name="name">Confirmación ticket cliente</field>
+        <record id="mail_template_ticket_en_progreso" model="mail.template">
+            <field name="name">Helpdesk - Ticket en Progreso</field>
             <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket"/>
-            <field name="subject">Ticket #{{ object.id }}: {{ object.name }} — Asignado</field>
+            <field name="subject">Ticket #{{ object.id }}: {{ object.name }} — En progreso</field>
             <field name="partner_to"></field>
             <field name="email_to"></field>
             <field name="body_html"><![CDATA[
@@ -28,11 +28,11 @@
           </td>
         </tr>
 
-        <!-- BANDA DE ESTADO -->
+        <!-- BANDA DE ESTADO — ámbar para en progreso -->
         <tr>
-          <td bgcolor="#1565c0" align="center" style="background-color:#1565c0;padding:11px 40px;">
+          <td bgcolor="#b45f06" align="center" style="background-color:#b45f06;padding:11px 40px;">
             <p style="margin:0;color:#ffffff;font-size:14px;font-weight:bold;">
-              Ticket asignado &nbsp;&#x2014;&nbsp; #<t t-esc="object.id"/>
+              Ticket en progreso &nbsp;&#x2014;&nbsp; #<t t-esc="object.id"/>
             </p>
           </td>
         </tr>
@@ -45,19 +45,19 @@
               Hola,
             </p>
             <p style="margin:0 0 24px 0;font-size:14px;color:#444444;line-height:1.7;">
-              Te informamos que el siguiente ticket ha sido <strong>registrado y asignado</strong>
-              a un responsable que lo atenderá a la brevedad.
+              Te informamos que tu ticket ya est&#225; siendo <strong>atendido</strong> por nuestro
+              equipo de soporte.
             </p>
 
             <!-- Nombre del ticket destacado -->
             <table width="100%" cellpadding="0" cellspacing="0"
-                   style="border-left:4px solid #0f2d6e;background-color:#f5f7fa;margin-bottom:24px;">
+                   style="border-left:4px solid #b45f06;background-color:#fef8ef;margin-bottom:24px;">
               <tr>
                 <td style="padding:16px 20px;">
                   <p style="margin:0 0 4px 0;font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:1px;">
                     Referencia del ticket
                   </p>
-                  <p style="margin:0;font-size:17px;font-weight:bold;color:#0f2d6e;">
+                  <p style="margin:0;font-size:17px;font-weight:bold;color:#8a4805;">
                     #<t t-esc="object.id"/> &mdash; <t t-esc="object.name"/>
                   </p>
                 </td>
@@ -90,21 +90,11 @@
               <tr>
                 <td bgcolor="#f5f7fa"
                     style="padding:11px 16px;font-size:13px;font-weight:bold;color:#555555;
-                           border-bottom:1px solid #dde3ec;background-color:#f5f7fa;">
+                           background-color:#f5f7fa;">
                   Equipo
                 </td>
-                <td style="padding:11px 16px;font-size:14px;color:#222222;border-bottom:1px solid #dde3ec;">
-                  <t t-esc="object.team_id.name or '—'"/>
-                </td>
-              </tr>
-              <tr>
-                <td bgcolor="#f5f7fa"
-                    style="padding:11px 16px;font-size:13px;font-weight:bold;color:#555555;
-                           vertical-align:top;background-color:#f5f7fa;">
-                  Descripci&#243;n
-                </td>
                 <td style="padding:11px 16px;font-size:14px;color:#222222;">
-                  <t t-out="object.description or '—'"/>
+                  <t t-esc="object.team_id.name or '—'"/>
                 </td>
               </tr>
             </table>
@@ -118,7 +108,7 @@
               <tr>
                 <td align="center">
                   <a t-att-href="object.get_portal_url()"
-                     style="display:inline-block;background-color:#0f2d6e;color:#ffffff;font-size:14px;
+                     style="display:inline-block;background-color:#b45f06;color:#ffffff;font-size:14px;
                             font-weight:bold;text-decoration:none;padding:12px 28px;">
                     Ver historial del ticket
                   </a>

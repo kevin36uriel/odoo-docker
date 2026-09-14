@@ -1,0 +1,22 @@
+<odoo>
+    <data noupdate="0">
+
+        <!--
+            Las etapas cerradas traían configurado el mail_template_id genérico de OCA
+            (closed_ticket_template), que se dispara automáticamente vía _track_template
+            al cambiar de etapa. Eso duplica el aviso de cierre: el cliente recibiría
+            ese correo simple ADEMÁS del correo con PDF de automatizacion_ticket_cerrado.xml.
+            Se limpia aquí para dejar un único correo de cierre (el que lleva el PDF).
+        -->
+        <record id="helpdesk_ticket_stage_done" model="helpdesk.ticket.stage">
+            <field name="mail_template_id" eval="False"/>
+        </record>
+        <record id="helpdesk_ticket_stage_cancelled" model="helpdesk.ticket.stage">
+            <field name="mail_template_id" eval="False"/>
+        </record>
+        <record id="helpdesk_ticket_stage_rejected" model="helpdesk.ticket.stage">
+            <field name="mail_template_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

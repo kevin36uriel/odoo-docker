@@ -115,6 +115,23 @@
               </tr>
             </table>
 
+            <!-- BOTÓN ACCESO PORTAL COMO INVITADO -->
+            <p style="margin:0 0 12px 0;font-size:13px;color:#555555;line-height:1.6;">
+              Puedes revisar el historial completo de comunicaci&#243;n de este ticket en cualquier
+              momento, sin necesidad de crear una cuenta:
+            </p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td align="center">
+                  <a t-att-href="object.get_portal_url()"
+                     style="display:inline-block;background-color:#1e7e34;color:#ffffff;font-size:14px;
+                            font-weight:bold;text-decoration:none;padding:12px 28px;">
+                    Ver historial del ticket
+                  </a>
+                </td>
+              </tr>
+            </table>
+
             <p style="margin:0;font-size:13px;color:#777777;line-height:1.7;">
               Si el problema persiste o tienes alguna duda, no dudes en contactarnos
               abriendo un nuevo ticket o respondiendo a este correo.
