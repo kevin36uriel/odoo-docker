@@ -15,12 +15,7 @@
         <!-- HEADER -->
         <tr>
           <td bgcolor="#ffffff" align="center" style="background-color:#ffffff;padding:28px 40px 20px 40px;border-bottom:4px solid #0f2d6e;">
-            <t t-set="logo_ps" t-value="env.ref('helpdesk_mgmt.logo_ps', raise_if_not_found=False)"/>
-            <img t-if="logo_ps and logo_ps.datas"
-                 t-att-src="'data:image/png;base64,' + logo_ps.datas.decode('ascii')"
-                 alt="Punto Singular" width="180" height="82"
-                 style="display:block;margin:0 auto;border:0;"/>
-            <p style="margin:14px 0 0 0;color:#0f2d6e;font-size:12px;letter-spacing:2px;text-transform:uppercase;">
+            <p style="margin:0;color:#0f2d6e;font-size:12px;letter-spacing:2px;text-transform:uppercase;">
               Sistema de Soporte
             </p>
           </td>
@@ -154,14 +149,7 @@
           <td bgcolor="#f5f7fa" style="background-color:#f5f7fa;padding:20px 40px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td width="120" valign="middle">
-                  <t t-set="logo_ps" t-value="env.ref('helpdesk_mgmt.logo_ps', raise_if_not_found=False)"/>
-                  <img t-if="logo_ps and logo_ps.datas"
-                       t-att-src="'data:image/png;base64,' + logo_ps.datas.decode('ascii')"
-                       alt="Punto Singular" width="100" height="46"
-                       style="display:block;border:0;"/>
-                </td>
-                <td valign="middle" style="padding-left:16px;border-left:2px solid #ccd5e0;">
+                <td valign="middle">
                   <p style="margin:0;font-size:13px;font-weight:bold;color:#0f2d6e;">
                     <t t-esc="object.company_id.name"/>
                   </p>
