@@ -14,6 +14,15 @@ services:
       - HOST=db
       - USER=odoo
       - PASSWORD=odoo
+      - TELEGRAM_ENABLED=${TELEGRAM_ENABLED:-0}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_BOT_TOKEN_FILE=${TELEGRAM_BOT_TOKEN_FILE:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - ODOO_INTERNAL_URL=${ODOO_INTERNAL_URL:-}
+      - TELEGRAM_READ_TIMEOUT=${TELEGRAM_READ_TIMEOUT:-10}
+      - TELEGRAM_MAX_ATTEMPTS=${TELEGRAM_MAX_ATTEMPTS:-3}
+      - TELEGRAM_RETRY_BACKOFF=${TELEGRAM_RETRY_BACKOFF:-60}
+      - TELEGRAM_QUEUE_BATCH_SIZE=${TELEGRAM_QUEUE_BATCH_SIZE:-5}
     # command: odoo -d odoo -i usuarios_iniciales,helpdesk_mgmt,oca_helpdesk_reports,custom --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
 
   db:
